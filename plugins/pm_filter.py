@@ -1174,8 +1174,6 @@ async def auto_filter(client, msg, spoll=False):
     if spoll:
         await msg.message.delete()
 
-
-
 async def advantage_spell_chok(msg):
     query = re.sub(
         r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|br((o|u)h?)*|^h(e|a)?(l)*(o)*|mal(ayalam)?|t(h)?amil|file|that|find|und(o)*|kit(t(i|y)?)?o(w)?|thar(u)?(o)*w?|kittum(o)*|aya(k)*(um(o)*)?|full\smovie|any(one)|with\ssubtitle(s)?)",
@@ -1218,21 +1216,17 @@ async def advantage_spell_chok(msg):
         await asyncio.sleep(8)
         await k.delete()
         return
-    SPELL_CHECK[msg.message_id] = movielist
-    btn = [[
-        InlineKeyboardButton(
-            text=movie.strip(),
-            callback_data=f"spolling#{user}#{k}",
-        )
-    ] for k, movie in enumerate(movielist)]
-    btn.append([InlineKeyboardButton(text="Close", callback_data=f'spolling#{user}#close_spellcheck')])
-    await msg.reply(f"""➪Hey👋 {msg.from_user.mention} 
-
-➪I couldn't find anything related to that
-
-➪Did you mean any one of these?""",
-                    reply_markup=InlineKeyboardMarkup(btn))
-
+    if SPELL_MODE:  
+                reply = search.replace(" ", "+")
+                reply_markup = InlineKeyboardMarkup([[
+                 InlineKeyboardButton("🔮IMDB🔮", url=f"https://imdb.com/find?q={reply}"),
+                 InlineKeyboardButton("🪐 Reason", callback_data="reason")
+                 ]]
+                )    
+                imdb=await get_poster(search)
+                if imdb and imdb.get('poster'):
+                    await message.reply_photo(photo=imdb.get('poster'), caption=LuciferMoringstar.GET_MOVIE_7.format(mention=message.from_user.mention, query=search, title=imdb.get('title'), genres=imdb.get('genres'), year=imdb.get('year'), rating=imdb.get('rating'), short=imdb.get('short_info'), url=imdb['url']), reply_markup=reply_markup) 
+                    return
 async def manual_filters(client, message, text=False):
     group_id = message.chat.id
     name = text or message.text
