@@ -9,7 +9,7 @@ import pyrogram
 from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, \
     make_inactive
 from info import ADMINS, AUTH_CHANNEL, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHOW_OFF, IMDB, \
-    SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE
+    SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE, CH_FILTER, CH_LINK
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram import Client, filters
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
@@ -29,6 +29,16 @@ logger.setLevel(logging.ERROR)
 BUTTONS = {}
 SPELL_CHECK = {}
 
+NORGE_IMG = f"https://telegra.ph/file/1616bc34ec34c9d74b5d2.jpg"
+
+IMDB_TEMPLATE = """<b>🏷 Title</b>: <a href={url}>{title}</a>
+🎭 Genres: {genres}
+📆 Year: <a href={url}/releaseinfo>{year}</a>
+🌟 Rating: <a href={url}/ratings>{rating}</a> / 10 (based on {votes} user ratings.)
+☀️ Languages : <code>{languages}</code>
+📀 RunTime: {runtime} Minutes
+📆 Release Info : {release_date}
+"""
 
 @Client.on_message(filters.group & filters.text & ~filters.edited & filters.incoming)
 async def give_filter(client, message):
@@ -64,7 +74,7 @@ async def next_page(bot, query):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"[{get_size(file.file_size)}] {file.file_name}", callback_data=f'files#{file.file_id}'
+                    text=f"📂{get_size(file.file_size)} 📂{file.file_name}", callback_data=f'files#{file.file_id}'
                 ),
             ]
             for file in files
@@ -143,6 +153,24 @@ async def advantage_spoll_choker(bot, query):
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "close_data":
+        await query.message.edit(
+            text="<b>Cʟᴏꜱɪɴɢ</b>"
+        )
+        await query.message.edit(
+            text="<b>Cʟᴏꜱɪɴɢ</b>⭗ ⭗ ⭗ ⭗ ⭗ ⭗"
+        )
+        await query.message.edit(
+            text="<b>Cʟᴏꜱɪɴɢ ɪɴ ᴘʀᴏɢʀᴇꜱꜱ</b>⦿ ⦿ ⦿ ⭗ ⭗ ⭗"
+        )
+        await query.message.edit(
+            text="<b>Cʟᴏꜱɪɴɢ ɪɴ ᴘʀᴏɢʀᴇꜱꜱ</b>⦿ ⦿ ⦿ ⦿ ⭗ ⭗"
+        )
+        await query.message.edit(
+            text="<b>Cʟᴏꜱɪɴɢ 𝙸𝙽 𝙿𝚁𝙾𝙶𝚁𝙴𝚂𝚂</b>⦿ ⦿ ⦿ ⦿ ⦿ ⭗"
+        )
+        await query.message.edit(
+            text="<b>Cʟᴏꜱɪɴɢ ɪɴ ᴘʀᴏɢʀᴇꜱꜱ</b>⦿ ⦿ ⦿ ⦿ ⦿ ⦿"
+        )
         await query.message.delete()
     elif query.data == "delallconfirm":
         userid = query.from_user.id
@@ -337,6 +365,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         files = files_[0]
         title = files.file_name
         size = get_size(files.file_size)
+        type = files.file_type
         f_caption = files.caption
         settings = await get_settings(query.message.chat.id)
         if CUSTOM_FILE_CAPTION:
@@ -344,6 +373,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 f_caption = CUSTOM_FILE_CAPTION.format(file_name='' if title is None else title,
                                                        file_size='' if size is None else size,
                                                        file_caption='' if f_caption is None else f_caption)
+
+                buttons = [[
+                  InlineKeyboardButton('JOIN GROUP', url='https://t.me/cinemakodathi')
+                  ]]                                        
             except Exception as e:
                 logger.exception(e)
             f_caption = f_caption
@@ -358,19 +391,41 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await query.answer(url=f"https://t.me/{temp.U_NAME}?start={ident}_{file_id}")
                 return
             else:
-                await client.send_cached_media(
-                    chat_id=query.from_user.id,
+                ms = await client.send_cached_media(
+                    chat_id=CH_FILTER,
                     file_id=file_id,
                     caption=f_caption,
                     protect_content=True if ident == "filep" else False 
                 )
-                await query.answer('Check PM, I have sent files in pm', show_alert=True)
-        except UserIsBlocked:
-            await query.answer('Unblock the bot mahn !', show_alert=True)
-        except PeerIdInvalid:
-            await query.answer(url=f"https://t.me/{temp.U_NAME}?start={ident}_{file_id}")
+                msg1 = await query.message.reply(
+                f'<b>Hey 👋{query.from_user.mention}\n\n'
+                f'<b>📫 Yᴏʀ Fɪʟᴇ ɪꜱ Rᴇᴀᴅʏ 👇\n\n'
+                f'<b>🎬 Mᴏᴠɪᴇ Nᴀᴍᴇ: {title}</b>\n\n'
+                f'<b>⚙️ Mᴏᴠɪᴇ Sɪᴢᴇ: {size}</b>\n\n'
+                f'<b>📂 Mᴏᴠɪᴇ Tʏᴘᴇ: {type}</b>\n\n'
+                '<code>THis file will be deleted in 5 minutes.!</code>',
+                True,
+                'html',
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton("🔰𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃 𝐍𝐎𝐖🔰", url = ms.link)
+                        ],
+                        [
+                            InlineKeyboardButton("⚠️ 𝐂𝐚𝐧'𝐭 𝐀𝐜𝐜𝐞𝐬𝐬❓𝐂𝐥𝐢𝐜𝐤 𝐇𝐞𝐫𝐞 ⚠️", url = f"{CH_LINK}")
+                        ]
+                    ]
+                )
+            )
+            await query.answer('Check Out The Chat',show_alert=True)
+            await asyncio.sleep(1000)
+            await msg1.delete()
+            await msg.delete()
+            del msg1, msg
         except Exception as e:
-            await query.answer(url=f"https://t.me/{temp.U_NAME}?start={ident}_{file_id}")
+            logger.exception(e, exc_info=True)
+            await query.answer(f"Encountering Issues", True)
+
     elif query.data.startswith("checksub"):
         if AUTH_CHANNEL and not await is_subscribed(client, query):
             await query.answer("I Like Your Smartness, But Don't Be Oversmart 😒", show_alert=True)
@@ -388,37 +443,404 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 f_caption = CUSTOM_FILE_CAPTION.format(file_name='' if title is None else title,
                                                        file_size='' if size is None else size,
                                                        file_caption='' if f_caption is None else f_caption)
+                buttons = [[
+                  InlineKeyboardButton('JOIN GROUP', url='https://t.me/cinemakodathi')
+                  ]]
             except Exception as e:
                 logger.exception(e)
                 f_caption = f_caption
         if f_caption is None:
             f_caption = f"{title}"
         await query.answer()
-        await client.send_cached_media(
-            chat_id=query.from_user.id,
+        ms = await client.send_cached_media(
+            chat_id=CH_FILTER,
             file_id=file_id,
             caption=f_caption,
             protect_content=True if ident == 'checksubp' else False
         )
+    elif query.data == "tip2": 
+        await query.answer(f" • ബ്രോ ഇതിലല്ല 😃 \n\n • താഴെ വരുന്ന മൂവി ലിസ്റ്റിലാണ് ഞെക്കേണ്ടത്😁",show_alert=True)
+    elif query.data == "sub": 
+        await query.answer(f" • ബ്രോ ഇതിലല്ല 😃 \n\n • ഗ്രൂപ്പിൽ വരുന്ന മൂവി ലിസ്റ്റിലാണ് ഞെക്കേണ്ടത്😁",show_alert=True)
+    elif query.data == "imd_alert":
+        imdb = await get_poster(query.message.reply_to_message.text)
+        await query.answer(f"""🏷 Title: {imdb['title']} 
+🎭 Genres: {imdb['genres']} 
+📆 Year: {imdb['year']} 
+🌟 Rating: {imdb['rating']} 
+☀️ Languages : {imdb['languages']} 
+📀 RunTime: {imdb['runtime']} Minutes
+📆 Release Info : {imdb['release_date']} 
+""",show_alert=True)
+
+
+    
+#boutton new add akkiye
     elif query.data == "pages":
         await query.answer()
     elif query.data == "start":
         buttons = [[
-            InlineKeyboardButton('➕ Add Me To Your Groups ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
-        ], [
-            InlineKeyboardButton('🔍 Search', switch_inline_query_current_chat=''),
-            InlineKeyboardButton('🤖 Updates', url='https://t.me/TeamEvamaria')
-        ], [
-            InlineKeyboardButton('ℹ️ Help', callback_data='help'),
-            InlineKeyboardButton('😊 About', callback_data='about')
+            InlineKeyboardButton('ᴄʟɪᴄᴋ ʜᴇʀᴇ', callback_data="mfk1"),
+            InlineKeyboardButton('ꜱᴇᴀʀᴄʜ ᴍᴏᴠɪᴇꜱ', callback_data="mfk2") 
+            ],[
+            InlineKeyboardButton('ᴀᴅᴍɪɴ', url="https://t.me/farshadck")                    
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         await query.message.edit_text(
-            text=script.START_TXT.format(query.from_user.mention, temp.U_NAME, temp.B_NAME),
+            text=script.START_TXT.format(query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode='html'
         )
-        await query.answer('Piracy Is Crime')
+    elif query.data == "mfk1":
+        buttons = [[
+            InlineKeyboardButton('ʟᴀᴛᴇꜱᴛ ᴍᴏᴠɪᴇꜱ', callback_data="moviekittan"),
+            InlineKeyboardButton('ᴀʙᴏᴜᴛ & ʜᴇʟᴩ', callback_data='stats')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(
+            text=script.MFK_1.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+
+    elif query.data == "f2001":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-N185Xy0xMDAxNjU3NjI5Mjg1Xy9iYXRjaA")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/a19c66ea096312b05e2ba.jpg",
+            caption="🎬 Title: Fast & Furious 1/n📅 Year: 2001/n🎙️Language: English/n📊Rating: 6.8/10",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )  
+
+    elif query.data == "f2003":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MTBfMTJfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/3f495cd7b84543089e2cc.jpg",
+            caption="🎬 Title: 2 Fast 2 Furious 1/n📅 Year: 2003/n🎙️Language: English/n📊Rating: 6.8/10",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "f2006":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MTNfMTZfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/c7b97d902e0b94dbfd50a.jpg",
+            caption="🎬 Title: Fast & Furious 3/n📅 Year: 2006/n🎙️Language: English/n📊Rating: 6.8/10",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "f2009":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MTdfMTlfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/cb6f3644a2223a33c1df5.jpg",
+            caption="🎬 Title: Fast & Furious 4/n📅 Year: 2009/n🎙️Language: English/n📊Rating: 6.8/10",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "f2011":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MjBfMjJfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/d8cc66612de7d1d0ed4d3.jpg",
+            caption="🎬 Title: Fast & Furious 5/n📅 Year: 2011/n🎙️Language: English/n📊Rating: 6.8/10",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "f2013":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MjNfMjVfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/7fcde6e1c720a8a34ea83.jpg",
+            caption="🎬 Title: Fast & Furious 6/n📅 Year: 2013/n🎙️Language: English/n📊Rating: 6.8/10",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "f2015":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MjZfMjhfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/c3ea555fca167431cec36.jpg",
+            caption="🎬 Title: Fast & Furious 7/n📅 Year: 2015/n🎙️Language: English/n📊Rating: 6.8/10",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "f2017":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MjlfMzFfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/8450380165caa3b01c5cf.jpg",
+            caption="🎬 Title: Fast & Furious 8/n📅 Year: 2017/n🎙️Language: English/n📊Rating: 6.8/10",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "f2019":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MzJfMzRfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/8da4cfb40e535acf85055.jpg",
+            caption="🎬 Title: ast & Furious Presents: Hobbs & Shaw 3/n📅 Year: 2019/n🎙️Language: English/n📊Rating: 6.8/10",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "f2021":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MzVfNDBfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/8affe4898f81c38849fc5.jpg",
+            caption="🎬 Title: Fast & Furious 9/n📅 Year: 2021/n🎙️Language: English/n📊Rating: 6.8/10",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "ha1":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-NTRfNThfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/d39128d12108a114625fd.jpg",
+            caption="""🎬 Title: Home Alone 1 
+📅 Year: 1990 
+🎙️Language: English Multi audio
+📊Rating: 7.4/10""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )  
+
+    elif query.data == "ha2":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-NTlfNjVfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/8beaabbd30f4dbf084f4e.jpg",
+            caption="""🎬 Title: Home Alone 2 
+📅 Year: 1992 
+🎙️Language: English Multi audio 
+📊Rating: 7.4/10""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "ha3":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-NjZfNzFfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/e854ab3fdf212c4c154a0.jpg",
+            caption="""🎬 Title: Home Alone 3 
+📅 Year: 1997 
+🎙️Language: English Multi audio 
+📊Rating: 7.4/10""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "ha4":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-NzJfNzZfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/97508660c08ed28f17823.jpg",
+            caption="""🎬 Title: Home Alone 4 
+📅 Year: 2002 
+🎙️Language: English Multi audio 
+📊Rating: 7.4/10""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "ha5":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-NzdfODBfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/1d9db2e6c40d3e3e57992.jpg",
+            caption="""🎬 Title: Home Alone 5 
+📅 Year: 2012 
+🎙️Language: English Multi audio 
+📊Rating: 7.4/10""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "ha6":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-ODFfODZfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/da6e500bd6589feb2b7df.jpg",
+            caption="""🎬 Title: Home Alone 6 
+📅 Year: 2021 
+🎙️Language: English Multi audio 
+📊Rating: 7.4/10""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        
+        )
+    elif query.data == "vk1":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-ODdfOTdfLTEwMDE2NTc2MjkyODVfL2JhdGNo")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/751866aa416b3195d029c.jpg",
+            caption="""🎬 Title: VIKINGS 01 
+📅 Year: 2013
+🎙️Language: English & Multi audio 
+📊Rating: 9.4/80""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+    elif query.data == "vk2":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-OThfMTA5Xy0xMDAxNjU3NjI5Mjg1Xy9iYXRjaA")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/751866aa416b3195d029c.jpg",
+            caption="""🎬 Title: VIKINGS 02 
+📅 Year: 2014
+🎙️Language: English & Multi audio 
+📊Rating: 9.4/80""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+    elif query.data == "vk3":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MTEwXzEyMV8tMTAwMTY1NzYyOTI4NV8vYmF0Y2g")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/751866aa416b3195d029c.jpg",
+            caption="""🎬 Title: VIKINGS 03 
+📅 Year: 2015
+🎙️Language: English & Multi audio 
+📊Rating: 9.4/80""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+    elif query.data == "vk4":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MTIyXzE0M18tMTAwMTY1NzYyOTI4NV8vYmF0Y2g")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/751866aa416b3195d029c.jpg",
+            caption="""🎬 Title: VIKINGS 04 
+📅 Year: 2017
+🎙️Language: English & Multi audio 
+📊Rating: 9.4/80""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+    elif query.data == "vk5":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/c/1657629285/166")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/751866aa416b3195d029c.jpg",
+            caption="""🎬 Title: VIKINGS 05 
+📅 Year: 2019
+🎙️Language: English & Multi audio 
+📊Rating: 9.4/80""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+    elif query.data == "vk6":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MTY3XzE3OF8tMTAwMTY1NzYyOTI4NV8vYmF0Y2g")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/751866aa416b3195d029c.jpg",
+            caption="""🎬 Title: VIKINGS 06 
+📅 Year: 2020
+🎙️Language: English & Multi audio 
+📊Rating: 9.4/80""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+    elif query.data == "vk7":
+        buttons = [[
+            InlineKeyboardButton('🔰 DOWNLOAD 🔰', url="https://t.me/lisamoviebot?start=DSTORE-MTc5XzIyMl8tMTAwMTY1NzYyOTI4NV8vYmF0Y2g")                     
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.reply_photo(
+            photo="https://telegra.ph/file/751866aa416b3195d029c.jpg",
+            caption="""🎬 Title: VIKINGS 06 PART B
+📅 Year: 2020
+🎙️Language: English & Multi audio 
+📊Rating: 9.4/80""",
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+    
+    elif query.data == "moviekittan":   
+        buttons = [[
+            InlineKeyboardButton("ʟᴀᴛᴇꜱᴛ ᴍᴏᴠɪᴇꜱ ᴄʜᴀɴɴᴇʟ", url='t.me/cinemakodathi')
+        ],[
+            InlineKeyboardButton("ᴄɪɴᴇᴍᴀ ᴋᴏᴅᴀᴛʜɪ", url='t.me/cinemakodathi')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(
+            text=script.MOVIE_KITTAN.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+
+    elif query.data == "mfk2":
+        buttons = [[
+            InlineKeyboardButton('ꜱᴇᴀʀᴄʜ ᴍᴏᴠɪᴇꜱ ᴄʟɪᴄᴋ ʜᴇʀᴇ', switch_inline_query_current_chat='')
+        ],[
+            InlineKeyboardButton('ʜᴏᴍᴇ', callback_data="start"),
+            InlineKeyboardButton('ᴄʟᴏꜱᴇ', callback_data='close_data')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(
+            text=script.SERCH_MOVIE.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+            
     elif query.data == "help":
         buttons = [[
             InlineKeyboardButton('Manual Filter', callback_data='manuelfilter'),
@@ -450,6 +872,16 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode='html'
         )
+    elif query.data == "tip3": 
+          await query.answer(f" • ബ്രോ ഇതിലല്ല 😃 \n\n • താഴെ വരുന്ന മൂവി ലിസ്റ്റിലാണ് ഞെക്കേണ്ടത്😁",show_alert=True)
+    elif query.data == "getmovie": 
+          await query.answer(f" ➪ നിങ്ങൾ ബോട്ടിന്റെ മെയിൻ ചാനലിൽ ജോയിൻ ചെയ്തിട്ടില്ല അതാണ് നിങ്ങൾക് സിനിമ കിട്ടാത്തത്  😃 \n\n ➪ മെയിൻ ചാനൽ link കിട്ടാൻ നിങ്ങൾ /clink എന്ന് മെസ്സേജ്  അയച്ചാൽ മതി 😁",show_alert=True)
+    elif query.data == "searchfile": 
+          await query.answer(f" ➪ inline ആയി മൂവി സെർച്ച്‌ ചെയ്യാൻ നിങ്ങൾ ബോട്ടിൽ /start എന്ന് അടിക്കുക \n\n ➪ ബോട്ട് റിപ്ലേ തരുന്ന മെസ്സേജിൽ ꜱᴇᴀʀᴄʜ ᴍᴏᴠɪᴇꜱ എന്ന ബട്ടണിൽ ക്ലിക്ക് ചയ്യുക",show_alert=True)
+    elif query.data == "commamds": 
+          await query.answer(f" ➪ നിങ്ങൾക്ക് ഇ ബോട്ടിൽ ലബ്യമായിട്ടുള്ള കമാണ്ടുകൾ കാണണം എങ്കിൽ /command എന്ന് മെസ്സേജ് ഇടുക",show_alert=True)
+    elif query.data == "enqury": 
+          await query.answer(f" ➪ നിങ്ങൾക് എന്തെങ്കിലും പറയാനുണ്ടേൽ admin ആയി ബന്ധപെടേണ്ടത് ആണ്",show_alert=True)
     elif query.data == "source":
         buttons = [[
             InlineKeyboardButton('👩‍🦯 Back', callback_data='about')
@@ -641,7 +1073,7 @@ async def auto_filter(client, msg, spoll=False):
         btn = [
             [
                 InlineKeyboardButton(
-                    text=f"[{get_size(file.file_size)}] {file.file_name}", callback_data=f'{pre}#{file.file_id}'
+                    text=f"📂{get_size(file.file_size)} 📂{file.file_name}", callback_data=f'{pre}#{file.file_id}'
                 ),
             ]
             for file in files
@@ -667,11 +1099,26 @@ async def auto_filter(client, msg, spoll=False):
         req = message.from_user.id if message.from_user else 0
         btn.append(
             [InlineKeyboardButton(text=f"🗓 1/{round(int(total_results) / 10)}", callback_data="pages"),
-             InlineKeyboardButton(text="NEXT ⏩", callback_data=f"next_{req}_{key}_{offset}")]
+             InlineKeyboardButton('🗑', callback_data='close_data'),
+             InlineKeyboardButton(text="NEXT ⏩", callback_data=f"next_{req}_{key}_{offset}")]   
+        )
+        btn.insert(0,
+            [InlineKeyboardButton(text="⭕️ 𝗝𝗢𝗜𝗡 𝗠𝗬 𝗖𝗛𝗔𝗡𝗡𝗘𝗟 ⭕️",url="https://t.me/moviesupdateck")]
+        )
+        btn.insert(0,
+            [InlineKeyboardButton(text=f"🔮 {msg.text} ",callback_data="imd_alert"),
+             InlineKeyboardButton(text=f"🗂 {total_results} ",callback_data="tip2")]
         )
     else:
         btn.append(
             [InlineKeyboardButton(text="🗓 1/1", callback_data="pages")]
+        )
+        btn.insert(0,
+            [InlineKeyboardButton(text="⭕️ 𝗝𝗢𝗜𝗡 𝗠𝗬 𝗖𝗛𝗔𝗡𝗡𝗘𝗟 ⭕️",url="https://t.me/moviesupdateck")]
+        )
+        btn.insert(0,
+            [InlineKeyboardButton(text=f"🔮 {msg.text} ",callback_data="imd_alert"),
+             InlineKeyboardButton(text=f"🗂 {total_results} ",callback_data="tip2")]
         )
     imdb = await get_poster(search, file=(files[0]).file_name) if settings["imdb"] else None
     TEMPLATE = settings['template']
@@ -708,7 +1155,9 @@ async def auto_filter(client, msg, spoll=False):
             **locals()
         )
     else:
-        cap = f"Here is what i found for your query {search}"
+        cap = f"""Hey 👋 {message.from_user.mention}😍
+
+ 📁 ғᴏᴜɴᴅ ✨ ғɪʟᴇs ғᴏʀ ʏᴏᴜʀ ǫᴜᴇʀʏ : #{search} 👇"""
     if imdb and imdb.get('poster'):
         try:
             await message.reply_photo(photo=imdb.get('poster'), caption=cap[:1024],
@@ -724,6 +1173,7 @@ async def auto_filter(client, msg, spoll=False):
         await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(btn))
     if spoll:
         await msg.message.delete()
+
 
 
 async def advantage_spell_chok(msg):
@@ -776,9 +1226,12 @@ async def advantage_spell_chok(msg):
         )
     ] for k, movie in enumerate(movielist)]
     btn.append([InlineKeyboardButton(text="Close", callback_data=f'spolling#{user}#close_spellcheck')])
-    await msg.reply("I couldn't find anything related to that\nDid you mean any one of these?",
-                    reply_markup=InlineKeyboardMarkup(btn))
+    await msg.reply(f"""➪Hey👋 {msg.from_user.mention} 
 
+➪I couldn't find anything related to that
+
+➪Did you mean any one of these?""",
+                    reply_markup=InlineKeyboardMarkup(btn))
 
 async def manual_filters(client, message, text=False):
     group_id = message.chat.id
