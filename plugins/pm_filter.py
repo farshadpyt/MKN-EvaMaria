@@ -1216,7 +1216,7 @@ async def advantage_spell_chok(msg):
         await asyncio.sleep(8)
         await k.delete()
         return
-    if SPELL_MODE:  
+    if SPELL_CHECK:  
                 reply = search.replace(" ", "+")
                 reply_markup = InlineKeyboardMarkup([[
                  InlineKeyboardButton("🔮IMDB🔮", url=f"https://imdb.com/find?q={reply}"),
