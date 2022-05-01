@@ -1225,7 +1225,7 @@ async def advantage_spell_chok(msg):
                 )    
                 imdb=await get_poster(search)
                 if imdb and imdb.get('poster'):
-                    await message.reply_photo(photo=imdb.get('poster'), caption=LuciferMoringstar.GET_MOVIE_7.format(mention=message.from_user.mention, query=search, title=imdb.get('title'), genres=imdb.get('genres'), year=imdb.get('year'), rating=imdb.get('rating'), short=imdb.get('short_info'), url=imdb['url']), reply_markup=reply_markup) 
+                    await message.reply_photo(photo=imdb.get('poster'), cap=TEMPLATE.format(mention=message.from_user.mention, query=search, title=imdb.get('title'), genres=imdb.get('genres'), year=imdb.get('year'), rating=imdb.get('rating'), short=imdb.get('short_info'), url=imdb['url']), reply_markup=reply_markup) 
                     return
 async def manual_filters(client, message, text=False):
     group_id = message.chat.id
